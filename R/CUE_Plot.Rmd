@@ -1,0 +1,268 @@
+---
+title: "Evalueation Plots for CUE"
+author: "Gang Li"
+date: "2/18/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+## remember to change ss and cc
+```
+
+## Outline
+
+Note: We have three result to evaluate.  
+1 CV on PTSD.  
+2 CV on ELGAN (Need to correct).  
+3 Cross Datasets with Combat.
+
+## Datasets:
+
+```{r ReadData, echo=FALSE}
+setwd("~/Dropbox/DNA Methylation Imputation/Code")
+#setwd("C:/Users/Gang Li/Dropbox/DNA Methylation Imputation/Code/")
+#plot_dir="C:/Users/Gang Li/Dropbox/DNA Methylation Imputation/Plot/"
+plot_dir="~/Dropbox/DNA Methylation Imputation/Plot/"
+data=1
+# 1 for CV on PTSD
+# 2 for CV on ELGAN
+# 3 for Combat (Test on PTSD)
+if (data==1){
+  dataset="PTSD"
+  load("~/Dropbox/DNA Methylation Imputation/Code/Data/PTSD_CV_Results.RData")
+  mse.Logit=NA
+  acc.Logit=NA
+} else if (data==2){
+  load("~/Dropbox/DNA Methylation Imputation/Code/Data/Corrected_ELGAN_CV_Results.RData")
+  dataset="ELGAN"
+} else if (data==3){
+  load("~/Dropbox/DNA Methylation Imputation/Code/Data/Corrected_Combat_TestOnPTSD_Results.RData")
+  dataset="Combat_Cross"
+}
+
+print(dataset)
+
+if (data>1){
+  mse<-cbind(mse.TCR,mse.RF,mse.XGB,mse.KNN,mse.Logit)
+  acc<-cbind(acc.TCR,acc.RF,acc.XGB,acc.KNN,acc.Logit)
+  method.code<-c("PFR","RF","XGBoost","KNN","Logit")
+  col=c(rainbow(4),"yellow")
+  
+}else{
+  mse<-cbind(mse.TCR,mse.RF,mse.XGB,mse.KNN)
+  acc<-cbind(acc.TCR,acc.RF,acc.XGB,acc.KNN)
+  method.code<-c("PFR","RF","XGBoost","KNN")
+  col=c(rainbow(4))
+  
+}
+colnames(mse)<-method.code
+colnames(acc)<-method.code
+
+#boxplot(mse.KNN,mse.RF, main="Car Milage Data",
+#        xlab="Number of Cylinders", ylab="Miles Per Gallon")
+
+mse.order<-t(apply(mse,1,order))
+colnames(mse.order)<-method.code
+
+best.method<-mse.order[,1]
+t=table(best.method)
+rownames(t)<-method.code
+lbls <- paste(names(t), "\n", round(t/sum(t)*100,digits = 1),"%",sep="")
+```
+
+
+
+
+##Pie plot for best methods before QC.
+
+```{r PiePlot, echo=FALSE}
+best.method<-mse.order[,1]
+t=table(best.method)
+rownames(t)<-method.code
+lbls <- paste(names(t), "\n", round(t/sum(t)*100,digits = 1),"%",sep="")
+fname=paste(plot_dir,"BestMethod_",dataset,".png",sep="")
+#png(fname,width=900,height=700)
+pie(t,labels = lbls,col=col, cex=1.5)
+#dev.off()
+```
+
+
+
+## The distribution of predicted RMSE and accruacy for CUE.
+```{r RMSEandACC, echo=FALSE}
+
+par(mfrow=c(1,2)) 
+mse.min=apply(mse,1,min)
+hist(mse.min)
+
+acc.max=apply(acc,1,max)
+hist(acc.max)
+
+dim(mse)
+dim(acc)
+
+library(ggplot2)
+library(gridExtra)
+
+# Threshold on Accruacy
+ss=0.95
+# Threshold on MSE
+cc=0.0025
+
+# 0.95 and 0.0025 for PTSD
+# 0.90 and 0.01 for PTSD
+
+#densityplot(~ mse.min)
+cue_summary=data.frame(sqrt(mse.min), acc.max)
+p1 <- ggplot(cue_summary) + geom_histogram(aes(x = mse.min, y = ..density..)) + geom_density(aes(x = mse.min),color="red") + geom_vline(xintercept = sqrt(cc), color = "grey", size=1.5) + xlab(paste("RMSE for ",dataset,sep=""))
+
+p2 <- ggplot(cue_summary) + geom_histogram(aes(x = acc.max, y = ..density..)) + geom_density(aes(x = acc.max),color="blue") + geom_vline(xintercept = ss, color = "grey", size=1.5) + xlab(paste("Accruacy for ",dataset,sep=""))
+
+#multiplot(p1, p2)
+grid.arrange(p1, p2, nrow = 1)
+
+#cue_summary_log<-log(cue_summary)
+#pp1 <- ggplot(cue_summary_log) + geom_histogram(aes(x = mse.min, y = ..density..)) + geom_density(aes(x = mse.min),color="red")+ geom_vline(xintercept = log(sqrt(cc)), color = "grey", size=1.5) + xlab(paste("log(RMSE) for ",dataset,sep=""))
+
+#pp2 <- ggplot(cue_summary_log) + geom_histogram(aes(x = acc.max, y = ..density..)) + geom_density(aes(x = acc.max),color="blue") + geom_vline(xintercept = log(ss), color = "grey", size=1.5) + xlab(paste("log(Accruacy) for ",dataset,sep=""))
+
+#multiplot(p1, p2)
+#grid.arrange(pp1, pp2, nrow = 1)
+
+```
+
+## Table 1 (RMSE and Accruacy) before QC
+```{r Table1, echo=TRUE}
+c(sqrt(apply(mse,2,mean)),sqrt(mean(mse.min)))
+c(apply(acc,2,mean),mean(acc.max))
+```
+
+
+## Barplot for RMSE and (1-acc) before and after QC.
+
+```{r QC, echo=FALSE}
+#ss=0.95
+#0.95
+#apply((acc>ss),2,sum)
+## MSE Threshold
+#cc=0.0025
+
+#apply((mse<cc),2,sum)
+
+## Plot threshold
+method.code<-c(method.code,"CUE")
+
+if (is.na(mse.Logit)){
+  test.mse=((mse.KNN<cc)+(mse.XGB<cc)+(mse.RF<cc)+(mse.TCR<cc))
+  test.acc=((acc.KNN>ss)+(acc.XGB>ss)+(acc.TCR>ss)+(acc.RF>ss))
+  col=rainbow(length(method.code)-1)
+} else {
+  test.acc=((acc.KNN>ss)+(acc.XGB>ss)+(acc.TCR>ss)+(acc.RF>ss)+(acc.Logit>ss))
+  test.mse=((mse.KNN<cc)+(mse.XGB<cc)+(mse.RF<cc)+(mse.TCR<cc)+(mse.Logit<cc))
+  col=c(rainbow(length(method.code)-2),"yellow")
+}
+
+#table(test.mse)
+#sum(test.mse>0)
+#sum(test.mse>0)/339033
+
+ind.mse<-which(test.mse>0)
+
+#print(table(test.acc))
+#sum(test.acc>0)
+#sum(test.acc>0)/339033
+
+ind.acc<-which(test.acc>0)
+
+ind<-intersect(ind.acc,ind.mse)
+
+print("Propotion of QCed probes for CUE.")
+print(c(length(ind),length(ind.mse),length(ind.acc))/(dim(mse)[1]))
+
+qcprobe=c(apply(((acc>ss)+(mse<cc)==2),2,sum),length(ind))
+#colnames(qcprobe)=method.code
+print(qcprobe)
+
+#dim(mse)
+mse.min=apply(mse,1,min)
+rmse_raw=sqrt(c(apply(mse,2,mean),mean(mse.min)))
+rmse_qc=sqrt(c(apply(mse[ind,],2,mean),mean(mse.min[ind])))
+rmse=rbind(rmse_raw,rmse_qc)
+colnames(rmse)=c(method.code)#,"Ensemble")
+#library(ggplot2)
+
+acc.max=apply(acc,1,max)
+acc_raw=(c(apply(acc[ind,],2,mean),mean(acc.max[ind])))
+acc_qc=(c(apply(acc[ind,],2,mean),mean(acc.max[ind])))
+tacc=1-rbind(acc_raw,acc_qc)
+colnames(tacc)=method.code
+
+qcprobe=c(apply(((acc>ss)+(mse<cc)==2),2,sum),length(ind))
+qcprobe<-rbind(qcprobe, round(qcprobe/(dim(mse)[1]),4))
+colnames(qcprobe)=method.code
+rownames(qcprobe)=c("NumProbes","Ratio")
+
+#options(digits=3) 
+options(scipen=999)
+print("Qced Probes for each method:")
+print(qcprobe)
+
+fname=paste(plot_dir,"Fig3_CUE_",dataset,".png",sep="")
+#png(fname,width=1800,height=700)
+mar.default <- c(5,4,4,2) + 0.1
+par(mar=mar.default+ c(0, 4, 4, 0),mfrow=c(1,2))
+
+barplot(rmse, col=rep(c(col,"black"),each=2), angle = c(45,0),density=c(10,100), beside=TRUE, ylab = "RMSE",ylim = c(0,0.06),cex.axis = 1.5,cex.names = 2,cex.lab=2)
+abline(h=min(rmse_qc)+0.0001,col = "lightgray", lty = 2,lwd=5)
+mtext(letters[1], adj=0, line=3.5,cex=4)
+
+
+barplot(tacc,col=rep(c(col,"black"),each=2), angle = c(45,0),density=c(10,100), beside=TRUE, ylab = "1-Accruacy",ylim = c(0,6e-04),cex.axis = 1.5,cex.names = 2,cex.lab=2)
+abline(h=min(1-acc_qc),col = "lightgray", lty = 2,lwd=5)
+mtext(letters[2], adj=0, line=3.5,cex=4)
+#dev.off()
+
+```
+
+##Pie plot for best methods aFTER QC.
+
+```{r PiePlot2, echo=FALSE}
+best.method_qc<-mse.order[ind,1]
+t_qc=table(best.method_qc)
+rownames(t_qc)<-head(method.code, -1)
+lbls <- paste(names(t_qc), "\n", round(t_qc/sum(t_qc)*100,digits = 1),"%",sep="")
+fname=paste(plot_dir,"BestMethod_",dataset,".png",sep="")
+#png(fname,width=900,height=700)
+pie(t_qc,labels = lbls,col=col, cex=1.5)
+#dev.off()
+```
+## save the best model
+
+```{r SaveModelList, echo=FALSE}
+#best.method
+if (data==1){
+  #print(method.code)
+  CpG_list_PFR<-names(which(best.method==1))
+  CpG_list_RF<-names(which(best.method==2))
+  CpG_list_XGBoost<-names(which(best.method==3))
+  CpG_list_KNN<-names(which(best.method==4))
+  #CpG_list_Logistic<-NULL
+  filename=paste(plot_dir,dataset,"_CpG_Best_method_list.RData",sep="")
+  save(CpG_list_PFR,CpG_list_RF,CpG_list_XGBoost,CpG_list_KNN,file=filename)
+  filename=paste(plot_dir,dataset,"_CUE_Evaluations.RData",sep="")
+  save(mse.min,acc.max,file=filename)
+} else{
+  #print(method.code)
+  CpG_list_PFR<-names(which(best.method==1))
+  CpG_list_RF<-names(which(best.method==2))
+  CpG_list_XGBoost<-names(which(best.method==3))
+  CpG_list_KNN<-names(which(best.method==4))
+  CpG_list_Logistic<-names(which(best.method==5))
+  filename=paste(plot_dir,dataset,"_CpG_Best_method_list.RData",sep="")
+  save(CpG_list_PFR,CpG_list_RF,CpG_list_XGBoost,CpG_list_KNN,file=filename)
+  filename=paste(plot_dir,dataset,"_CUE_Evaluations.RData",sep="")
+  save(mse.min,acc.max,file=filename)
+}
+
+```
