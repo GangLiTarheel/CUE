@@ -30,4 +30,38 @@ devtools::install_github("")
 library("CUE")
 ```
 
+## Using the shiny app: CUE_QC.R to select the QC+ probe list.
+```{r CUE_QC}
+runApp(appDir = CUE_QC)
+```
+
+
+## Download the imputaiton models from FTP.
+
+
+## Required library for imputaiton.
+# Please install those R packages before imputations.
+
+```{r init, message=TRUE}
+library("randomForest")
+library("xgBoost")
+
+library("parallel")
+
+```
+
+
+## Perfrom imputation
+```{r perform imputation}
+m.imputed<-CUE(data,probe.list)
+```
+
+```{r output from CUE}
+## Output : DNA methylation matrix
+m.imputed[1:10,1:10]
+```
+
+
+## Citation
+CUE
 
