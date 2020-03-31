@@ -54,7 +54,9 @@ library(parallel) # Use this package if you need parallel computing to accelerat
 
 
 ## Perfrom imputation
+Here we show the imputation for a toy dataset with three samples, 248K HM450K probes.
 ```{r perform imputation}
+sample_data<-load("sample_Data.RData")
 m.imputed<-CUE(data,probe.list)
 ```
 
