@@ -43,9 +43,10 @@ runApp(appDir = CUE_QC)
 # Please install those R packages before imputations.
 
 ```{r init, message=TRUE}
-library(randomForest)
-library(xgboost)
+library(randomForest) # RF
+library(xgboost) # XGBoost
 library("class") # KNN
+source("R/refund_lib.R")
 
 library(parallel) # Use this package if you need parallel computing to accelerate computation speed
 
