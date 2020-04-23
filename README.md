@@ -2,10 +2,10 @@
 ### CpG impUtation Ensemble for DNA Methylation Levels Across the HumanMethylation450 (HM450) BeadChip and HumanMethylation EPIC (HM850) BeadChip Platforms
 
 DNA methylation at CpG dinucleotides is one of the most extensively studied epigenetic marks. With technological advancements, geneticists can profile DNA methylation with multiple reliable approaches. 
-However, different profiling platforms can differ substantially in the density of and actual measurements for the CpGs they assess, consequently hindering integrated analysis across platforms. 
+However, different profiling platforms can differ substantially in the CpGs they assess, consequently hindering integrated analysis across platforms. 
 Here, we present CpG impUtation Ensemble (CUE), which leverages multiple classical statistical and modern machine learning methods, to impute from the Illumina HumanMethylation450 (HM450) BeadChip to the Illumina HumanMethylationEPIC (HM850) BeadChip. 
 
-CUE is maintained by Gang Li [franklee@live.unc.edu] and Laura Raffield.
+CUE is maintained by Gang Li [franklee@live.unc.edu] and Laura Raffield [laura_raffield@unc.edu].
 
 ## News and Updates
 * Version 0.0.1 released
@@ -29,8 +29,8 @@ devtools::install_github("")
 ```{r init, message=TRUE}
 library("CUE")
 ```
-# Required library for imputaiton.
-Please install those R packages before imputations.
+# Required library for imputation.
+Please install the following R packages before performing imputation.
 
 ```{r init, message=TRUE}
 library(randomForest) # RF
@@ -42,7 +42,7 @@ library(parallel) # Use this package if you need parallel computing to accelerat
 
 ```
 
-## Download the pretrained imputaiton models 
+## Download the pretrained imputation models 
 
 
 ftp -i rc-ns-ftp.its.unc.edu
