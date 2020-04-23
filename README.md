@@ -54,7 +54,7 @@ ELGAN:
 
 
 ## CUE imputation
-Here we show the imputation for a toy dataset with three samples, 248K HM450K probes.
+Here we show how CUE performs imputation for a toy dataset with three samples and 248K HM450K probes.
 ```{r perform imputation}
 sample_data<-load("sample_Data.RData")
 #m.imputed<-CUE(data,probe.list)
@@ -62,14 +62,14 @@ source("impute.R")
 
 ```
 
-Note: we impute all 339K probes, and one must used the following quality control to retain the well imputed model.
+Note: we impute all 339K HM850 specific probes which had complete data in our reference whole blood and placenta datasets. Users of CUE must use the following quality control steps to retain the well imputed probes only for use in subsequent analysis (such as epigenome wide association studies).
 
-## Qualtiy Control
+## Quality Control
 Using the shiny app: CUE_QC.R to select the QC+ probe list.
 ```{r CUE_QC}
 runApp(appDir = CUE_QC)
 ```
-App would save a list of well imputed probes. Users can uses the following code
+The shiny app will save a list of well imputed probes. Users can use the following code to save this list. 
 
 ```{r subset}
 load("csv from QC app")
