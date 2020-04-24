@@ -17,7 +17,7 @@
 #' 
 #' # Perform imputation using CUE.impute
 #' HM850.impute <- CUE.impute(HM450)
-#' @import 
+#' @import randomForest, xgboost, class
 #' @export
 CUE.impute <- function(HM450){
 
