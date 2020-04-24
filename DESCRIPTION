@@ -1,9 +1,9 @@
 Package: CUE
 Title: CUE: CpG impUtation Ensemble for DNA Methylation Levels Across the HumanMethylation450 (HM450) BeadChip and HumanMethylation EPIC (HM850) BeadChip Platforms
-Version: 0.0.0.9000
+Version: 0.0.0.1
 Author: c(  person("Gang", "Li", email = "franklee@live.unc.edu", role = c("aut", "cre")),
              person("Yun", "Li", email = "yunli@med.unc.edu", role = c("aut")))
-Maintainer: Yuchen Yang <yyuchen@email.unc.edu>
+Maintainer: Gang Li <franklee@live.unc.edu>
 Description: This function CUE is to impute from HM450K to HM850K for DNA methylation data.
 Depends: R (>= 3.6.0)
 License: GPL-3
