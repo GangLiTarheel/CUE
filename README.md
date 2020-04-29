@@ -38,12 +38,20 @@ library("CUE")
 ### Required library for imputation.
 Please install the following version of R and R packages before performing imputation.
 
+
+
 * R version 3.6.0 (2019-04-26)
 
 * class_7.3-15        
 * xgboost_0.82.1      
 * randomForest_4.6-14
 * parallel
+
+Note: to install an R packages, simply run install.packages("Name_of_package"). For example,
+```
+install.packages("xgboost")
+```
+
 
 ```{r init, message=TRUE}
 library(randomForest) # RF
@@ -64,25 +72,28 @@ Please save the above pretrained models (tar.gz files) in the same directory of 
 
 To extract the pre-trained models:
 
+Make two directories for two sets of pre-trained models:
 ```
 pwd # this should be your root directory of CUE
 mkdir PTSD
 mkdir ELGAN
+```
 
-```
-### copy the pre PTSD pretrained model to this folder and then decompress.
-```
-cd PTSD
+Download the pre-trained models amd move the PTSD and ELGAN pretrained models to the corresponding folder.
 ### Whole blood (PTSD): 
 ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/PTSD_model.tar.gz
-tar -xf PTSD_model.tar.gz
-cd ../
-```
-### copy the pre ELGAN pretrained model to this folder and then decompress.
-```
-cd ELGAN
 ### Placenta (ELGAN): 
 ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/ELGAN_model.tar.gz
+
+
+###  then decompress.
+
+```
+cd PTSD
+tar -xf PTSD_model.tar.gz
+cd ../
+
+cd ELGAN
 tar -xf ELGAN_model.tar.gz
 cd ../
 ```
@@ -97,13 +108,14 @@ sample_data<-load("PTSD/sample_Data.RData")
 X<-sample_data
 m<-dim(X)[2] # number of samples
 
-<!-- #m.imputed<-CUE.impute(X=X,m=m,tissue="PTSD") -->
 source("impute.R")
 
 # the output will be saved as y_impute.RData
 #save(m.imputed,file="y_impute.RData")
 
 ```
+
+<!-- #m.imputed<-CUE.impute(X=X,m=m,tissue="PTSD") -->
 
 Note: we impute all 339K HM850 specific probes which had complete data in our reference whole blood and placenta datasets. Users of CUE must use the following quality control steps to retain the well imputed probes only for use in subsequent analysis (such as epigenome wide association studies).
 
