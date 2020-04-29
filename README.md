@@ -33,6 +33,7 @@ library("CUE")
 Please install the following version of R and R packages before performing imputation.
 
 R version 3.6.0 (2019-04-26)
+
 class_7.3-15        
 xgboost_0.82.1      
 randomForest_4.6-14
@@ -61,13 +62,24 @@ Please save the above pretrained models (tar.gz files) in the same directory of 
 
 To extract the pre-trained models:
 
+pwd # this should be your root directory of CUE
+mkdir PTSD
+cd PTSD
+# copy the pre PTSD pretrained model to this folder and then decompress.
 tar -xf PTSD_model.tar.gz
+cd ../
+mkdir ELGAN
+cd ELGAN
+# copy the pre ELGAN pretrained model to this folder and then decompress.
 tar -xf ELGAN_model.tar.gz
+cd ../
+
 
 ## CUE imputation
 Here we show the imputation for a toy dataset with three samples, 248K HM450K probes. 
 The reason we use only 248K probes is that when we trained models, we only retain the 248,421 HM450 CpG sites (sites overlapping between ELGAN and PTSD, and without missingness in our samples) to train since we don't want the incompleteness or the pre-imputation on HM450 affects our evaluations on HM850 imputation.
 The full list of 248K HM450K probes can be found in Probes.RData.
+#  The input dataset X should have row as probes, columns as samples.
 ```{r perform imputation}
 sample_data<-load("sample_Data.RData")
 X<-sample_data

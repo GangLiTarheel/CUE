@@ -1,13 +1,37 @@
 load("Data/PTSD_CpG_Best_method_list.RData")
-load("Annotations.RData")
-load("Sample_Dataset.RData")
+load("PTSD/Annotations.RData")
+load("PTSD/Sample_Dataset.RData")
 load("Data/PTSD.neighbors.RData")
+load()
 
 # line 64 need to change the directory
 
 X<-sample_data
+#  the input dataset should have row as probes, columns as samples.
 m<-dim(X)[2] # number of samples
 
+# Check the input
+
+CUE.check(X){
+    # check if NA
+    if (sum(is.nan(X))==0){
+        print("Completeness checked! The input HM450 data don't have any missing NAs.")
+    }else{
+        stop("Error: the input HM450 data contains missingness! Please complete the dataset first!")
+    }
+
+    # check probe.list
+    if (sum(probe.list %in% rownames(X)) == 248421){
+        print("Probe list checked! The input HM450 data contain all the required probes.")
+    }else{
+        stop("Error: the input HM450 data does not contain all the required probes.! Please complete the dataset first!")
+    }
+
+    m<-dim(X)[2]
+    cat("The input data contain all 248,421 required probes of",m,"samples.\n")
+}
+
+# impute
 CUE.impute(X=X,m=m,tissue="PTSD"){
     ## RF
     library(randomForest)
