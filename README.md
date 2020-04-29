@@ -66,22 +66,22 @@ To extract the pre-trained models:
 ```
 pwd # this should be your root directory of CUE
 mkdir PTSD
+mkdir ELGAN
+
+```
+### copy the pre PTSD pretrained model to this folder and then decompress.
+```
 cd PTSD
 ### Whole blood (PTSD): 
 ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/PTSD_model.tar.gz
 tar -xf PTSD_model.tar.gz
 cd ../
 ```
-### copy the pre PTSD pretrained model to this folder and then decompress.
+### copy the pre ELGAN pretrained model to this folder and then decompress.
 ```
-mkdir ELGAN
 cd ELGAN
 ### Placenta (ELGAN): 
 ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/ELGAN_model.tar.gz
-cd ../
-```
-### copy the pre ELGAN pretrained model to this folder and then decompress.
-```
 tar -xf ELGAN_model.tar.gz
 cd ../
 ```
