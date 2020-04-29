@@ -46,8 +46,10 @@ library(parallel) # Use this package if you need parallel computing to accelerat
 
 Note: The compressed pre-trained models need around ~ 58 GB (ELGAN ~36 GB; and PTSD ~21 GB) memory of storage.
 
-Whole blood: ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/PTSD_model.tar.gz
-ELGAN: ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/ELGAN_model.tar.gz
+# Whole blood (PTSD): 
+ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/PTSD_model.tar.gz
+# Placenta (ELGAN): 
+ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/ELGAN_model.tar.gz
 
 Please save the above pretrained models (tar.gz files) in the same directory of your CUE packages.
 
