@@ -2,10 +2,10 @@
 ### CpG impUtation Ensemble for DNA Methylation Levels Across the HumanMethylation450 (HM450) BeadChip and HumanMethylation EPIC (HM850) BeadChip Platforms
 
 DNA methylation at CpG dinucleotides is one of the most extensively studied epigenetic marks. With technological advancements, geneticists can profile DNA methylation with multiple reliable approaches. 
-However, different profiling platforms can differ substantially in the density of and actual measurements for the CpGs they assess, consequently hindering integrated analysis across platforms. 
+However, different profiling platforms can differ substantially in the CpGs they assess, consequently hindering integrated analysis across platforms. 
 Here, we present CpG impUtation Ensemble (CUE), which leverages multiple classical statistical and modern machine learning methods, to impute from the Illumina HumanMethylation450 (HM450) BeadChip to the Illumina HumanMethylationEPIC (HM850) BeadChip. 
 
-CUE is maintained by Gang Li [franklee@live.unc.edu] and Laura Raffield.
+CUE is maintained by Gang Li [franklee@live.unc.edu] and Laura Raffield [laura_raffield@unc.edu].
 
 ## News and Updates
 * Version 0.0.1 released
@@ -29,8 +29,8 @@ devtools::install_github("")
 ```{r init, message=TRUE}
 library("CUE")
 ```
-# Required library for imputaiton.
-Please install those R packages before imputations.
+# Required library for imputation.
+Please install the following R packages before performing imputation.
 
 ```{r init, message=TRUE}
 library(randomForest) # RF
@@ -42,7 +42,7 @@ library(parallel) # Use this package if you need parallel computing to accelerat
 
 ```
 
-## Download the pretrained imputaiton models 
+## Download the pretrained imputation models 
 
 Note: The compressed pre-trained models need around ~ 58 GB (ELGAN ~36 GB; and PTSD ~21 GB) memory of storage.
 
@@ -71,14 +71,14 @@ save(m.imputed,file="y_impute.RData")
 
 ```
 
-Note: we impute all 339K probes, and one must used the following quality control to retain the well imputed model.
+Note: we impute all 339K HM850 specific probes which had complete data in our reference whole blood and placenta datasets. Users of CUE must use the following quality control steps to retain the well imputed probes only for use in subsequent analysis (such as epigenome wide association studies).
 
-## Qualtiy Control
+## Quality Control
 Using the shiny app: CUE_QC.R to select the QC+ probe list.
 ```{r CUE_QC}
 runApp(appDir = CUE_QC)
 ```
-App would save a list of well imputed probes. Users can uses the following code
+The shiny app will save a list of well imputed probes. Users can use the following code to save this list. 
 
 ```{r subset}
 #load("csv from QC app")
