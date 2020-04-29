@@ -19,9 +19,10 @@ Our method is also easily useable for imputation in other tissues, provided the 
 ## Installation 
 
 CUE package can be directly installed as following:
-
+cd ../
 git clone https://github.com/GangLiTarheel/CUE.git
 cd CUE
+cd ../
 <!-- ```{r installation}
 install.packages("devtools")
 
@@ -36,12 +37,12 @@ library("CUE")
 ### Required library for imputation.
 Please install the following version of R and R packages before performing imputation.
 
-R version 3.6.0 (2019-04-26)
+* R version 3.6.0 (2019-04-26)
 
-class_7.3-15        
-xgboost_0.82.1      
-randomForest_4.6-14
-parallel
+* class_7.3-15        
+* xgboost_0.82.1      
+* randomForest_4.6-14
+* parallel
 
 ```{r init, message=TRUE}
 library(randomForest) # RF
@@ -57,27 +58,33 @@ library(parallel) # Use this package if you need parallel computing to accelerat
 
 Note: The compressed pre-trained models need around ~ 58 GB (ELGAN ~36 GB; and PTSD ~21 GB) memory of storage.
 
-### Whole blood (PTSD): 
-ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/PTSD_model.tar.gz
-### Placenta (ELGAN): 
-ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/ELGAN_model.tar.gz
 
 Please save the above pretrained models (tar.gz files) in the same directory of your CUE packages.
 
 To extract the pre-trained models:
 
+```
 pwd # this should be your root directory of CUE
 mkdir PTSD
 cd PTSD
-### copy the pre PTSD pretrained model to this folder and then decompress.
+### Whole blood (PTSD): 
+ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/PTSD_model.tar.gz
 tar -xf PTSD_model.tar.gz
 cd ../
+```
+### copy the pre PTSD pretrained model to this folder and then decompress.
+```
 mkdir ELGAN
 cd ELGAN
+### Placenta (ELGAN): 
+ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/ELGAN_model.tar.gz
+cd ../
+```
 ### copy the pre ELGAN pretrained model to this folder and then decompress.
+```
 tar -xf ELGAN_model.tar.gz
 cd ../
-
+```
 
 ## CUE imputation
 Here we show the imputation for a toy dataset with three samples, 248K HM450K probes. 
