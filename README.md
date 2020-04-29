@@ -30,7 +30,13 @@ devtools::install_github("")
 library("CUE")
 ```
 # Required library for imputation.
-Please install the following R packages before performing imputation.
+Please install the following version of R and R packages before performing imputation.
+
+R version 3.6.0 (2019-04-26)
+class_7.3-15        
+xgboost_0.82.1      
+randomForest_4.6-14
+parallel
 
 ```{r init, message=TRUE}
 library(randomForest) # RF
