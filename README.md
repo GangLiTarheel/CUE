@@ -44,21 +44,30 @@ library(parallel) # Use this package if you need parallel computing to accelerat
 
 ## Download the pretrained imputaiton models 
 
+Note: The compressed pre-trained models need around ~ 58 GB (ELGAN ~36 GB; and PTSD ~21 GB) memory of storage.
 
-ftp -i rc-ns-ftp.its.unc.edu
-  user: yunlianon
-  secret (upon request)
+Whole blood: ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/PTSD_model.tar.gz
+ELGAN: ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/ELGAN_model.tar.gz
 
-Whole blood: CUE/PTSD_model.tar.gz
-ELGAN: 
+Please save the above pretrained models (tar.gz files) in the same directory of your CUE packages.
 
+To extract the pre-trained models:
+
+tar -xf PTSD_model.tar.gz
+tar -xf ELGAN_model.tar.gz
 
 ## CUE imputation
-Here we show the imputation for a toy dataset with three samples, 248K HM450K probes.
+Here we show the imputation for a toy dataset with three samples, 248K HM450K probes. 
+The reason we use only 248K probes is that when we trained models, we only retain the 248,421 HM450 CpG sites (sites overlapping between ELGAN and PTSD, and without missingness in our samples) to train since we don't want the incompleteness or the pre-imputation on HM450 affects our evaluations on HM850 imputation.
+The full list of 248K HM450K probes can be found in Probes.RData.
 ```{r perform imputation}
 sample_data<-load("sample_Data.RData")
-#m.imputed<-CUE(data,probe.list)
+X<-sample_data
+m<-dim(X)[2] # number of samples
+#m.imputed<-CUE.impute(X=X,m=m,tissue="PTSD")
 source("impute.R")
+
+save(m.imputed,file="y_impute.RData")
 
 ```
 
@@ -72,17 +81,18 @@ runApp(appDir = CUE_QC)
 App would save a list of well imputed probes. Users can uses the following code
 
 ```{r subset}
-load("csv from QC app")
-load("All probes from CUE impute.")
-m.impute <- m.impute[,paste(QC_probes)]
+#load("csv from QC app")
+load("y_impute.RData")
+m.QC <- m.imputed[,paste(QC_probes)]
 
-save ("RData")
+save(m.QC, file="m.imputed.QC.RData")
 ```
 
 
 ```{r output from CUE}
 ## Output : DNA methylation matrix
-m.imputed[1:10,1:10]
+head(m.QC[,1:10])
+dim(m.QC)
 ```
 
 ## Citation
