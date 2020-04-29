@@ -19,10 +19,11 @@ Our method is also easily useable for imputation in other tissues, provided the 
 ## Installation 
 
 CUE package can be directly installed as following:
-cd ../
+```
 git clone https://github.com/GangLiTarheel/CUE.git
 cd CUE
-cd ../
+```
+
 <!-- ```{r installation}
 install.packages("devtools")
 
