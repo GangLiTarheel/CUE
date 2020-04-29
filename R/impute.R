@@ -1,17 +1,18 @@
 load("Data/PTSD_CpG_Best_method_list.RData")
 load("PTSD/Annotations.RData")
-load("PTSD/Sample_Dataset.RData")
+#load("PTSD/Sample_Dataset.RData")
 load("Data/PTSD.neighbors.RData")
-load()
+load("Data/Probes.RData")
 
 # line 64 need to change the directory
 
-X<-sample_data
+#X<-sample_data
 #  the input dataset should have row as probes, columns as samples.
-m<-dim(X)[2] # number of samples
+#m<-dim(X)[2] # number of samples
+
+root_dir = getwd()
 
 # Check the input
-
 CUE.check(X){
     # check if NA
     if (sum(is.nan(X))==0){
@@ -35,13 +36,13 @@ CUE.check(X){
 CUE.impute(X=X,m=m,tissue="PTSD"){
     ## RF
     library(randomForest)
-    load("RF/best_RF.RData")
+    load("PTSD/RF/best_RF.RData")
 
     RF.impute<-function(i){
     cov.probe<-neighbors_RF[[i]]
     cov.select <- X[cov.probe,]
     #temp=c(1,1,1)
-    rf<-readRDS(paste("RF/model_",CpG_list_RF[i],".rds",sep=""))
+    rf<-readRDS(paste("PTSD/RF/model_",CpG_list_RF[i],".rds",sep=""))
     #y_RF[1,]<-predict(rf,t(X))
     return(predict(rf,t(X[cov.probe,])))
     }
@@ -51,11 +52,11 @@ CUE.impute(X=X,m=m,tissue="PTSD"){
 
     ## XGBoost
     library(xgboost)
-    load("XGB/best_XGB.RData")
+    load("PTSD/XGB/best_XGB.RData")
     XGB.impute<-function(i){
     cov.probe<-neighbors_XGB[[i]]
     cov.select <- X[cov.probe,]
-    bst<-xgb.load(paste("XGB/model_",CpG_list_XGBoost[i],".model",sep=""))
+    bst<-xgb.load(paste("PTSD/XGB/model_",CpG_list_XGBoost[i],".model",sep=""))
     #y_RF[1,]<-predict(rf,t(X))
     return(predict(bst,t(X[cov.probe,])))
     }
@@ -66,12 +67,12 @@ CUE.impute(X=X,m=m,tissue="PTSD"){
 
     ## KNN
     library(xgboost)
-    load("XGB/best_XGB.RData")
-    load("KNN/best_KNN.RData")
+    load("PTSD/XGB/best_XGB.RData")
+    load("PTSD/KNN/best_KNN.RData")
     KNN.impute<-function(i){
     cov.probe<-neighbors_KNN[[i]]
     cov.select <- X[cov.probe,]
-    bst<-xgb.load(paste("KNN/model_",CpG_list_KNN[i],".model",sep=""))
+    bst<-xgb.load(paste("PTSD/KNN/model_",CpG_list_KNN[i],".model",sep=""))
     #y_RF[1,]<-predict(rf,t(X))
     return(predict(bst,t(X[cov.probe,])))
     }
@@ -82,12 +83,12 @@ CUE.impute(X=X,m=m,tissue="PTSD"){
     ## TCR
     X=log2(X/(1-X))
 
-    source("/proj/yunligrp/users/gangli/methylation/EPIC_450K_VA/11_VarSel/refund_lib.R")
-    load("TCR/best_TCR.RData")
+    source("R/refund_lib.R")
+    load("PTSD/TCR/best_TCR.RData")
 
     # Create the density 
     # Build the functional predictor for each group
-    setwd("CUE/TCR/")
+    setwd("PTSD/CUE/TCR/")
     isl_group <- c("", "Island", "N_Shelf", "N_Shore", "S_Shore", "S_Shelf")
     test.dens <- list()
     test.funcs <- list()
@@ -128,7 +129,8 @@ CUE.impute(X=X,m=m,tissue="PTSD"){
     return(m.impute)
 }
 
-m.imputed<-CUE.impute(data,probe.list)
+CUE.check(X)
+m.imputed<-CUE.impute(X,m,"PTSD")
 
-#setwd("")
+setwd(root_dir)
 save(m.imputed,file="y_impute.RData")

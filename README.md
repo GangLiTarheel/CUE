@@ -1,35 +1,39 @@
 # CUE
 ### CpG impUtation Ensemble for DNA Methylation Levels Across the HumanMethylation450 (HM450) BeadChip and HumanMethylation EPIC (HM850) BeadChip Platforms
 
-DNA methylation at CpG dinucleotides is one of the most extensively studied epigenetic marks. With technological advancements, geneticists can profile DNA methylation with multiple reliable approaches. 
+DNA methylation at CpG dinucleotides is one of the most extensively studied epigenetic marks. 
+With technological advancements, geneticists can profile DNA methylation with multiple reliable approaches. 
 However, different profiling platforms can differ substantially in the CpGs they assess, consequently hindering integrated analysis across platforms. 
 Here, we present CpG impUtation Ensemble (CUE), which leverages multiple classical statistical and modern machine learning methods, to impute from the Illumina HumanMethylation450 (HM450) BeadChip to the Illumina HumanMethylationEPIC (HM850) BeadChip. 
 
 CUE is maintained by Gang Li [franklee@live.unc.edu] and Laura Raffield [laura_raffield@unc.edu].
 
 ## News and Updates
-* Version 0.0.1 released
+* Version 0.0.9 released
 
 ## Brief introduction
 From this study, we provide two sets of imputation models: one for whole blood and the other for placenta. 
 Investigators can therefore complete their own imputation of placental or whole blood HM850 CpG sites using their own HM450 data, without access to their own reference panel. 
 Our method is also easily useable for imputation in other tissues, provided the user can provide a reference dataset assayed on both HM450 and HM850.
 
-## Installation （Under construction）
+## Installation 
 
-CUE package can be directly installed from GitHub with:
-```{r installation}
+CUE package can be directly installed as following:
+
+git clone https://github.com/GangLiTarheel/CUE.git
+cd CUE
+<!-- ```{r installation}
 install.packages("devtools")
 
 devtools::install_github("")
-```
-
+``` -->
+<!-- 
 
 ## Set up the library
 ```{r init, message=TRUE}
 library("CUE")
-```
-# Required library for imputation.
+``` -->
+### Required library for imputation.
 Please install the following version of R and R packages before performing imputation.
 
 R version 3.6.0 (2019-04-26)
@@ -53,9 +57,9 @@ library(parallel) # Use this package if you need parallel computing to accelerat
 
 Note: The compressed pre-trained models need around ~ 58 GB (ELGAN ~36 GB; and PTSD ~21 GB) memory of storage.
 
-# Whole blood (PTSD): 
+### Whole blood (PTSD): 
 ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/PTSD_model.tar.gz
-# Placenta (ELGAN): 
+### Placenta (ELGAN): 
 ftp://yunlianon:anon@rc-ns-ftp.its.unc.edu/CUE/ELGAN_model.tar.gz
 
 Please save the above pretrained models (tar.gz files) in the same directory of your CUE packages.
@@ -65,12 +69,12 @@ To extract the pre-trained models:
 pwd # this should be your root directory of CUE
 mkdir PTSD
 cd PTSD
-# copy the pre PTSD pretrained model to this folder and then decompress.
+### copy the pre PTSD pretrained model to this folder and then decompress.
 tar -xf PTSD_model.tar.gz
 cd ../
 mkdir ELGAN
 cd ELGAN
-# copy the pre ELGAN pretrained model to this folder and then decompress.
+### copy the pre ELGAN pretrained model to this folder and then decompress.
 tar -xf ELGAN_model.tar.gz
 cd ../
 
@@ -79,15 +83,17 @@ cd ../
 Here we show the imputation for a toy dataset with three samples, 248K HM450K probes. 
 The reason we use only 248K probes is that when we trained models, we only retain the 248,421 HM450 CpG sites (sites overlapping between ELGAN and PTSD, and without missingness in our samples) to train since we don't want the incompleteness or the pre-imputation on HM450 affects our evaluations on HM850 imputation.
 The full list of 248K HM450K probes can be found in Probes.RData.
-#  The input dataset X should have row as probes, columns as samples.
+###  The input dataset X should have row as probes, columns as samples.
 ```{r perform imputation}
-sample_data<-load("sample_Data.RData")
+sample_data<-load("PTSD/sample_Data.RData")
 X<-sample_data
 m<-dim(X)[2] # number of samples
-#m.imputed<-CUE.impute(X=X,m=m,tissue="PTSD")
+
+<!-- #m.imputed<-CUE.impute(X=X,m=m,tissue="PTSD") -->
 source("impute.R")
 
-save(m.imputed,file="y_impute.RData")
+# the output will be saved as y_impute.RData
+#save(m.imputed,file="y_impute.RData")
 
 ```
 
