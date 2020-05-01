@@ -122,12 +122,13 @@ Note: we impute all 339K HM850 specific probes which had complete data in our re
 ## Quality Control
 Using the shiny app: CUE_QC.R to select the QC+ probe list.
 ```{r CUE_QC}
-runApp(appDir = CUE_QC)
+runApp('CUE_QC.R')
 ```
 The shiny app will save a list of well imputed probes. Users can use the following code to save this list. 
 
 ```{r subset}
-#load("csv from QC app")
+QC_probes<-read.csv("Placenta (ELGAN)QC_probe_list.csv") # for Placenta
+#QC_probes<-read.csv("Whole Blood (PTSD)QC_probe_list") # for whole blood
 load("y_impute.RData")
 m.QC <- m.imputed[,paste(QC_probes)]
 

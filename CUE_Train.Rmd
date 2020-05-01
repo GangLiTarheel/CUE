@@ -1,0 +1,118 @@
+---
+title: "CUE_Train"
+author: "Gang Li"
+date: "4/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## CUE train model
+
+This rmarkdown show how we train each imputation model. Three approaches for selecting weights for CUE can be found in paper.
+```{r generate_simulation_data}
+# generate HM450 as x and HM850 as y
+n = 100              # number of sampels
+x <- matrix(rbeta(n*50,1,1),ncol=n) # upperstream 25 probes and downstream 25 probes measured by HM450
+y <- rbeta(n,1,1)    # the target HM850 probe
+
+Meth<-data.frame(cbind(y,t(x)))
+train=1:80
+test=81:100
+
+```
+
+## Train with PFR
+
+```{r PFR}
+source("R/refund_lib.R")
+Y=log2(y/(1-y))
+X=log2(x/(1-x))
+
+isl_group <- c("", "Island", "N_Shelf", "N_Shore", "S_Shore", "S_Shelf")
+
+train.dens <- list()
+train.funcs <- list()
+test.dens <- list()
+test.funcs <- list()
+
+for (l in isl_group) {
+    if (l == "") {
+      j <- "NA"
+    } else {
+      j <- l
+    }
+    # max(X)==13.28757
+    test.dens[[j]] <- X[annotation.450K[, "Relation_to_UCSC_CpG_Island"] == l,test]
+    test.funcs[[j]] <- apply(test.dens[[j]], 2, function(x) {density(x,from=-13.38757,to=13.38757)$y})
+    train.dens[[j]] <- X[annotation.450K[, "Relation_to_UCSC_CpG_Island"] == l,train] 
+    train.funcs[[j]] <- apply(train.dens[[j]], 2, function(x) {density(x,from=-13.38757,to=13.38757)$y})   
+}
+
+j <- paste(annotation.EPIC[probe[i],"Relation_to_UCSC_CpG_Island"])
+    if (j == "") {
+      j <- "NA"
+    }
+fit = new_pfr(unlist(Y[probe[i],train]),
+                    t(X[,train]), 
+                    t(train.funcs[[j]]))
+
+X.test <- create_predictors(t(X[,test]), t(test.funcs[[j]]))
+Y.test <- X.test %*% fit$coefs
+pred_test <- 2 ^ Y.test / (2 ^ Y.test + 1)
+
+
+```
+
+## Train with XGBoosting
+
+```{r xgb}
+library(xgboost)
+bst <- xgboost(data = t(x[,train]),
+                             label = y[train],
+                             #ax.depth = 2, eta = 1,
+                             thread = 1, nrounds = 10,
+                             objective = "reg:linear",verbose = 0)
+              
+pred_test<-predict(bst,t(x[,test]))
+```
+
+## Train with random forests
+
+```{r RF}
+library(randomForest)
+rf=randomForest(as.formula(paste("y~.")), data = Meth, subset=train ,mty=5,ntree=10)
+
+pred_test<-predict(rf,Meth[test,2:(dim(Meth)[2])])
+
+```
+
+## Train with KNN
+
+```{r KNN}
+library("class")
+
+knn=knn(train = Meth[train,2:dim(x)[1]],
+                      test = Meth[test,2:dim(x)[1]],
+                      cl = Meth[train,1],
+                      k=50,
+                      prob=T)
+
+pred_test<-as.numeric(as.matrix(knn))
+```
+
+
+
+## Train with logistic regression
+
+```{r Logistic}
+y[y>0.5]=1;y[y<=0.5]=0;
+Meth<-data.frame(cbind(y,t(x)))
+logit=glm(as.formula(paste("y~.")),Meth[train,],family = binomial)
+# Note for some probes: the alg might not converge. In this case, we recommend to abondon logistic and work with the rest 4 methods if this happens.
+# glm.fit: algorithm did not convergeglm.fit: fitted probabilities numerically 0 or 1 occurred
+pred_test<-predict(logit,Meth[test,],type = "response")
+```
+
