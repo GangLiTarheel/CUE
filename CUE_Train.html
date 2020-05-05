@@ -383,7 +383,41 @@ test=81:100</code></pre>
 </div>
 <div id="train-with-pfr" class="section level2">
 <h2>Train with PFR</h2>
-<pre class="r"><code>#source(&quot;R/refund_lib.R&quot;)</code></pre>
+<pre class="r"><code>source(&quot;R/refund_lib.R&quot;)
+Y=log2(y/(1-y))
+X=log2(x/(1-x))
+
+isl_group &lt;- c(&quot;&quot;, &quot;Island&quot;, &quot;N_Shelf&quot;, &quot;N_Shore&quot;, &quot;S_Shore&quot;, &quot;S_Shelf&quot;)
+
+train.dens &lt;- list()
+train.funcs &lt;- list()
+test.dens &lt;- list()
+test.funcs &lt;- list()
+
+for (l in isl_group) {
+    if (l == &quot;&quot;) {
+      j &lt;- &quot;NA&quot;
+    } else {
+      j &lt;- l
+    }
+    # max(X)==13.28757
+    test.dens[[j]] &lt;- X[annotation.450K[, &quot;Relation_to_UCSC_CpG_Island&quot;] == l,test]
+    test.funcs[[j]] &lt;- apply(test.dens[[j]], 2, function(x) {density(x,from=-13.38757,to=13.38757)$y})
+    train.dens[[j]] &lt;- X[annotation.450K[, &quot;Relation_to_UCSC_CpG_Island&quot;] == l,train] 
+    train.funcs[[j]] &lt;- apply(train.dens[[j]], 2, function(x) {density(x,from=-13.38757,to=13.38757)$y})   
+}
+
+j &lt;- paste(annotation.EPIC[probe[i],&quot;Relation_to_UCSC_CpG_Island&quot;])
+    if (j == &quot;&quot;) {
+      j &lt;- &quot;NA&quot;
+    }
+fit = new_pfr(unlist(Y[probe[i],train]),
+                    t(X[,train]), 
+                    t(train.funcs[[j]]))
+
+X.test &lt;- create_predictors(t(X[,test]), t(test.funcs[[j]]))
+Y.test &lt;- X.test %*% fit$coefs
+pred_PFR_test &lt;- 2 ^ Y.test / (2 ^ Y.test + 1)</code></pre>
 </div>
 <div id="train-with-xgboosting" class="section level2">
 <h2>Train with XGBoosting</h2>
@@ -394,7 +428,7 @@ bst &lt;- xgboost(data = t(x[,train]),
                              thread = 1, nrounds = 10,
                              objective = &quot;reg:linear&quot;,verbose = 0)
               
-pred_test&lt;-predict(bst,t(x[,test]))</code></pre>
+pred_XGB_test&lt;-predict(bst,t(x[,test]))</code></pre>
 </div>
 <div id="train-with-random-forests" class="section level2">
 <h2>Train with random forests</h2>
@@ -403,7 +437,7 @@ pred_test&lt;-predict(bst,t(x[,test]))</code></pre>
 <pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
 <pre class="r"><code>rf=randomForest(as.formula(paste(&quot;y~.&quot;)), data = Meth, subset=train ,mty=5,ntree=10)
 
-pred_test&lt;-predict(rf,Meth[test,2:(dim(Meth)[2])])</code></pre>
+pred_RF_test&lt;-predict(rf,Meth[test,2:(dim(Meth)[2])])</code></pre>
 </div>
 <div id="train-with-knn" class="section level2">
 <h2>Train with KNN</h2>
@@ -415,7 +449,7 @@ knn=knn(train = Meth[train,2:dim(x)[1]],
                       k=50,
                       prob=T)
 
-pred_test&lt;-as.numeric(as.matrix(knn))</code></pre>
+pred_KNN_test&lt;-as.numeric(as.matrix(knn))</code></pre>
 </div>
 <div id="train-with-logistic-regression" class="section level2">
 <h2>Train with logistic regression</h2>
@@ -426,7 +460,10 @@ logit=glm(as.formula(paste(&quot;y~.&quot;)),Meth[train,],family = binomial)</co
 <pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
 <pre class="r"><code># Note for some probes: the alg might not converge. In this case, we recommend to abondon logistic and work with the rest 4 methods if this happens.
 # glm.fit: algorithm did not convergeglm.fit: fitted probabilities numerically 0 or 1 occurred
-pred_test&lt;-predict(logit,Meth[test,],type = &quot;response&quot;)</code></pre>
+pred_Logistic_test&lt;-predict(logit,Meth[test,],type = &quot;response&quot;)</code></pre>
+<!-- ## CUE prediction -->
+<!-- ```{r CUE} -->
+<!-- ``` -->
 </div>
 
 
