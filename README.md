@@ -52,6 +52,9 @@ Note: to install an R packages, simply run install.packages("Name_of_package"). 
 install.packages("xgboost")
 ```
 
+Note: you can also install the version of xgboost we used from the source code:
+https://cran.r-project.org/src/contrib/Archive/xgboost/xgboost_0.82.1.tar.gz
+
 
 ```{r init, message=TRUE}
 library(randomForest) # RF
@@ -104,7 +107,10 @@ The reason we use only 248K probes is that when we trained models, we only retai
 The full list of 248K HM450K probes can be found in Probes.RData.
 ###  The input dataset X should have row as probes, columns as samples.
 ```{r perform imputation}
-sample_data<-load("PTSD/sample_Data.RData")
+setwd(“/YOUR_DIRECTORY/CUE”)
+# Replace YOUR_DIRECTORY with your directory where you downloaded CUE.
+
+sample_data<-load("PTSD/Sample_Dataset.RData")
 X<-sample_data
 m<-dim(X)[2] # number of samples
 
