@@ -127,7 +127,9 @@ Note: we impute all 339K HM850 specific probes which had complete data in our re
 
 ## Quality Control
 We provdies two sets of QC+ probes list for two datsets with the following thresholds:
+
 QC for ELGAN: RMSE<0.1 and Accruracy > 90%; 
+
 QC for PTSD: RMSE<0.05 and Accruracy > 95%.
 
 ```{r subset}
@@ -145,6 +147,7 @@ runApp('CUE_QC.R')
 ```
 The shiny app will save the list of well imputed probes. Users can use the previous code to subset the output probes. 
 
+The final QC+ imputed HM850 probes will be saved as "m.imputed.QC.RData". See the output:
 
 ```{r output from CUE}
 ## Output : DNA methylation matrix
