@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## CUE train model
 
-This rmarkdown show how we train each imputation model. Three approaches for selecting weights for CUE can be found in paper.
+This rmarkdown show how we train each imputation model. Three approaches for selecting weights for CUE can be found in our paper. This approach can be used for users who would like to generate a new imputation reference dataset, for example by providing 450K and EPIC array data for a tissue other than placenta or whole blood (which are the only tissues currently available with our pretrained models). 
 ```{r generate_simulation_data}
 # generate HM450 as x and HM850 as y
 n = 100              # number of sampels
