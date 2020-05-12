@@ -1,8 +1,4 @@
-load("Data/PTSD_CpG_Best_method_list.RData")
-load("PTSD/Annotations.RData")
-#load("PTSD/Sample_Dataset.RData")
-load("Data/PTSD.neighbors.RData")
-load("Data/Probes.RData")
+
 
 # line 64 need to change the directory
 
@@ -10,7 +6,6 @@ load("Data/Probes.RData")
 #  the input dataset should have row as probes, columns as samples.
 #m<-dim(X)[2] # number of samples
 
-root_dir = getwd()
 
 # Check the input
 CUE_check <- function(X){
@@ -20,16 +15,17 @@ CUE_check <- function(X){
     }else{
         stop("Error: the input HM450 data contains missingness! Please complete the dataset first!")
     }
-    
+
     # check probe.list
     if (sum(probe.list %in% rownames(X)) == 248421){
         print("Probe list checked! The input HM450 data contain all the required probes.")
     }else{
         stop("Error: the input HM450 data does not contain all the required probes.! Please complete the dataset first!")
     }
-    
+
     m<-dim(X)[2]
     cat("The input data contain all 248,421 required probes of",m,"samples.\n")
+    cat("Check input: Done!!!\n")
 }
 
 RF.impute<-function(i){
@@ -69,27 +65,18 @@ TCR.impute<-function(i){
     return(2 ^ Y.test / (2 ^ Y.test + 1))
 }
 
-load("PTSD/RF/best_RF.RData")
-load("PTSD/XGB/best_XGB.RData")
-load("PTSD/KNN/best_KNN.RData")
-source("R/refund_lib.R")
-load("PTSD/TCR/best_TCR.RData")
-
-library(randomForest)
-library(xgboost)
-
 # impute
 CUE.impute <- function(X=X,m=m,tissue="PTSD"){
     ## RF
     y_RF<-sapply(1:length(CpG_list_RF),RF.impute)
     colnames(y_RF)<-CpG_list_RF
     rownames(y_RF)<-colnames(X)
-    
+
     ## XGBoost
     y_XGB<-sapply(1:length(CpG_list_XGBoost),XGB.impute)
     rownames(y_XGB)=colnames(X)
     colnames(y_XGB)<-CpG_list_XGBoost
-    
+
     ## KNN
     y_KNN<-sapply(1:length(CpG_list_KNN),KNN.impute)
     rownames(y_KNN)=colnames(X)
@@ -97,6 +84,7 @@ CUE.impute <- function(X=X,m=m,tissue="PTSD"){
     
     ## TCR
     X=log2(X/(1-X))
+
     # Create the density 
     # Build the functional predictor for each group
     # setwd("PTSD/CUE/TCR/")
@@ -108,17 +96,12 @@ CUE.impute <- function(X=X,m=m,tissue="PTSD"){
         test.dens[[j]] <- X[ (annotation.450K[, "Relation_to_UCSC_CpG_Island"] == l),]
         test.funcs[[j]]<-apply(test.dens[[j]], 2, function(x){density(x,from=-13.38757,to=13.38757)$y})
     }
+
     y_PFR<-sapply(1:length(CpG_list_PFR),TCR.impute)
     rownames(y_PFR)=colnames(X)
     colnames(y_PFR)<-CpG_list_PFR
-    
+
     m.impute<-cbind(y_PFR,y_RF,y_XGB,y_KNN)
     return(m.impute)
 }
 
-X=sample_data
-CUE_check(X)
-m.imputed<-CUE.impute(X,m,"PTSD")
-
-setwd(root_dir)
-save(m.imputed,file="y_impute.RData")

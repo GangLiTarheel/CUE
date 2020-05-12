@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## CUE train model
 
-This rmarkdown show how we train each imputation model. Three approaches for selecting weights for CUE can be found in paper.
+This rmarkdown show how we train each imputation model. Three approaches for selecting weights for CUE can be found in our paper. These training processes can be used for users who would like to generate a new set of imputation reference models, for example by providing 450K and EPIC array data for a tissue other than placenta or whole blood (which are the only tissues currently available with our pretrained models). 
 ```{r generate_simulation_data}
 # generate HM450 as x and HM850 as y
 n = 100              # number of sampels
@@ -28,7 +28,12 @@ test=81:100
 
 ```{r PFR, eval=FALSE}
 source("R/refund_lib.R")
-load("Data/Annotations.RData")
+load("PTSD/Annotations.RData")
+p=dim(annotation.450K)[1]
+X_450 = matrix(rbeta(n*p,1,1),ncol=n) 
+rownames(X_450) <- rownames(annotation.450K)
+X_450 = log2(X_450/(1-X_450))
+
 Y=log2(y/(1-y))
 X=log2(x/(1-x))
 
@@ -46,17 +51,20 @@ for (l in isl_group) {
       j <- l
     }
     # max(X)==13.28757
-    test.dens[[j]] <- X[annotation.450K[, "Relation_to_UCSC_CpG_Island"] == l,test]
+    test.dens[[j]] <- X_450[annotation.450K[, "Relation_to_UCSC_CpG_Island"] == l,test]
     test.funcs[[j]] <- apply(test.dens[[j]], 2, function(x) {density(x,from=-13.38757,to=13.38757)$y})
-    train.dens[[j]] <- X[annotation.450K[, "Relation_to_UCSC_CpG_Island"] == l,train] 
+    train.dens[[j]] <- X_450[annotation.450K[, "Relation_to_UCSC_CpG_Island"] == l,train] 
     train.funcs[[j]] <- apply(train.dens[[j]], 2, function(x) {density(x,from=-13.38757,to=13.38757)$y})   
 }
 
-j <- paste(annotation.EPIC[probe[i],"Relation_to_UCSC_CpG_Island"])
+## random select a target probe Y to impute:
+target_probe = rownames(annotation.EPIC)[sample.int(dim(annotation.EPIC),1)]
+
+j <- paste(annotation.EPIC[target_probe,"Relation_to_UCSC_CpG_Island"])
     if (j == "") {
       j <- "NA"
     }
-fit = new_pfr(unlist(Y[probe[i],train]),
+fit = new_pfr(unlist(Y[train]),
                     t(X[,train]), 
                     t(train.funcs[[j]]))
 
@@ -117,12 +125,3 @@ logit=glm(as.formula(paste("y~.")),Meth[train,],family = binomial)
 pred_Logistic_test<-predict(logit,Meth[test,],type = "response")
 ```
 
-## CUE prediction
-```{r CUE}
-# equal weights
-K=4
-pred_CUE_equal——weighs <- 1/K * (pred_Logistic_test + )
-pred_CUE <- 
-
-
-```

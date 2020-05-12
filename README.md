@@ -107,17 +107,49 @@ The reason we use only 248K probes is that when we trained models, we only retai
 The full list of 248K HM450K probes can be found in Probes.RData.
 ###  The input dataset X should have row as probes, columns as samples.
 ```{r perform imputation}
+## Set the working directory
 setwd(“/YOUR_DIRECTORY/CUE”)
 # Replace YOUR_DIRECTORY with your directory where you downloaded CUE.
 
-sample_data<-load("PTSD/Sample_Dataset.RData")
-X<-sample_data
-m<-dim(X)[2] # number of samples
+root_dir = getwd()
 
-source("impute.R")
 
-# the output will be saved as y_impute.RData
-#save(m.imputed,file="y_impute.RData")
+## load sample dataset
+load("PTSD/Sample_Dataset.RData")
+X<-sample_data                            # Input HM450
+m<-dim(X)[2] # number of samples          # Number of smaples
+
+## load required datasets 
+load("PTSD/Annotations.RData")                # load Annotation data
+load("Data/PTSD.neighbors.RData")             # load All neighbors
+load("Data/Probes.RData")                     # load All probes' names
+
+## load required datasets for PTSD imputation
+load("Data/PTSD_CpG_Best_method_list.RData")  # load the best method list 
+load("PTSD/RF/best_RF.RData")                 # load neighbors for RF
+load("PTSD/XGB/best_XGB.RData")               # load neighbors for XGB
+load("PTSD/KNN/best_KNN.RData")               # load neighbors for KNN
+load("PTSD/TCR/best_TCR.RData")               # load neighbors for PFR
+
+## load all the required packages
+library(randomForest)
+library(xgboost)
+library(xgboost)
+source("R/refund_lib.R")
+
+## load the CUE imputation function
+source("R/impute.R")
+
+## Check the input
+CUE_check(X)                        # check if the inuput X match the requirements
+
+## Imputation (Single CPU might takes 4-5 days to imputation for a middle sized methylation dataset (n=~100 samples).)
+m.imputed<-CUE.impute(X,m,"PTSD")
+
+## Save the imputed probes as y_impute.RData
+setwd(root_dir)
+save(m.imputed,file="y_impute.RData")
+
 
 ```
 
@@ -126,11 +158,11 @@ source("impute.R")
 Note: we impute all 339K HM850 specific probes which had complete data in our reference whole blood and placenta datasets. Users of CUE must use the following quality control steps to retain the well imputed probes only for use in subsequent analysis (such as epigenome wide association studies).
 
 ## Quality Control
-We provdies two sets of QC+ probes list for two datsets with the following thresholds:
-
-QC for ELGAN: RMSE<0.1 and Accruracy > 90%; 
-
-QC for PTSD: RMSE<0.05 and Accruracy > 95%.
+Using the shiny app: CUE_QC.R to select the QC+ probe list.
+```{r CUE_QC}
+runApp('CUE_QC.R')
+```
+The shiny app will save a list of well imputed probes. Users can use the following code to save this list. 
 
 ```{r subset}
 QC_probes<-read.csv("Placenta (ELGAN)QC_probe_list.csv") # for Placenta
@@ -141,13 +173,6 @@ m.QC <- m.imputed[,paste(QC_probes)]
 save(m.QC, file="m.imputed.QC.RData")
 ```
 
-(Optional): We also provide an shiny app, CUE_QC.R, an visualization tool to select the QC+ probe list.
-```{r CUE_QC}
-runApp('CUE_QC.R')
-```
-The shiny app will save the list of well imputed probes. Users can use the previous code to subset the output probes. 
-
-The final QC+ imputed HM850 probes will be saved as "m.imputed.QC.RData". See the output:
 
 ```{r output from CUE}
 ## Output : DNA methylation matrix
