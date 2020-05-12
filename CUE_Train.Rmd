@@ -125,3 +125,12 @@ logit=glm(as.formula(paste("y~.")),Meth[train,],family = binomial)
 pred_Logistic_test<-predict(logit,Meth[test,],type = "response")
 ```
 
+## CUE prediction
+```{r CUE}
+# equal weights
+K=4
+pred_CUE_equal——weighs <- 1/K * (pred_Logistic_test + )
+pred_CUE <- 
+
+
+```
