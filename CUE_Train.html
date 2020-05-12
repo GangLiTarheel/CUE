@@ -364,26 +364,33 @@ summary {
 
 <h1 class="title toc-ignore">CUE_Train</h1>
 <h4 class="author">Gang Li</h4>
-<h4 class="date">4/30/2020</h4>
+<h4 class="date">5/12/2020</h4>
 
 </div>
 
 
 <div id="cue-train-model" class="section level2">
 <h2>CUE train model</h2>
-<p>This rmarkdown show how we train each imputation model. Three approaches for selecting weights for CUE can be found in paper.</p>
+<p>This rmarkdown show how we train each imputation model. Three approaches for selecting weights for CUE can be found in our paper. These training processes can be used for users who would like to generate a new set of imputation reference models, for example by providing 450K and EPIC array data for a tissue other than placenta or whole blood (which are the only tissues currently available with our pretrained models).</p>
 <pre class="r"><code># generate HM450 as x and HM850 as y
-n = 100              # number of sampels
+n = 200              # number of sampels
 x &lt;- matrix(rbeta(n*50,1,1),ncol=n) # upperstream 25 probes and downstream 25 probes measured by HM450
 y &lt;- rbeta(n,1,1)    # the target HM850 probe
 
 Meth&lt;-data.frame(cbind(y,t(x)))
-train=1:80
-test=81:100</code></pre>
+train=1:160
+test=161:200</code></pre>
 </div>
 <div id="train-with-pfr" class="section level2">
 <h2>Train with PFR</h2>
 <pre class="r"><code>source(&quot;R/refund_lib.R&quot;)
+#load(&quot;PTSD/Annotations.RData&quot;)
+load(&quot;Data/Annotations.RData&quot;)
+p=dim(annotation.450K)[1]
+X_450 = matrix(rbeta(n*p,1,1),ncol=n) 
+rownames(X_450) &lt;- rownames(annotation.450K)
+X_450 = log2(X_450/(1-X_450))
+
 Y=log2(y/(1-y))
 X=log2(x/(1-x))
 
@@ -401,21 +408,26 @@ for (l in isl_group) {
       j &lt;- l
     }
     # max(X)==13.28757
-    test.dens[[j]] &lt;- X[annotation.450K[, &quot;Relation_to_UCSC_CpG_Island&quot;] == l,test]
+    test.dens[[j]] &lt;- X_450[annotation.450K[, &quot;Relation_to_UCSC_CpG_Island&quot;] == l,test]
     test.funcs[[j]] &lt;- apply(test.dens[[j]], 2, function(x) {density(x,from=-13.38757,to=13.38757)$y})
-    train.dens[[j]] &lt;- X[annotation.450K[, &quot;Relation_to_UCSC_CpG_Island&quot;] == l,train] 
+    train.dens[[j]] &lt;- X_450[annotation.450K[, &quot;Relation_to_UCSC_CpG_Island&quot;] == l,train] 
     train.funcs[[j]] &lt;- apply(train.dens[[j]], 2, function(x) {density(x,from=-13.38757,to=13.38757)$y})   
 }
 
-j &lt;- paste(annotation.EPIC[probe[i],&quot;Relation_to_UCSC_CpG_Island&quot;])
+## random select a target probe Y to impute:
+target_probe = rownames(annotation.EPIC)[sample.int(dim(annotation.EPIC),1)]
+
+j &lt;- paste(annotation.EPIC[target_probe,&quot;Relation_to_UCSC_CpG_Island&quot;])
     if (j == &quot;&quot;) {
       j &lt;- &quot;NA&quot;
     }
-fit = new_pfr(unlist(Y[probe[i],train]),
+fit = new_pfr(unlist(Y[train]),
                     t(X[,train]), 
-                    t(train.funcs[[j]]))
-
-X.test &lt;- create_predictors(t(X[,test]), t(test.funcs[[j]]))
+                    t(train.funcs[[j]]))</code></pre>
+<pre><code>## Loading required package: mgcv</code></pre>
+<pre><code>## Loading required package: nlme</code></pre>
+<pre><code>## This is mgcv 1.8-28. For overview type 'help(&quot;mgcv-package&quot;)'.</code></pre>
+<pre class="r"><code>X.test &lt;- create_predictors(t(X[,test]), t(test.funcs[[j]]))
 Y.test &lt;- X.test %*% fit$coefs
 pred_PFR_test &lt;- 2 ^ Y.test / (2 ^ Y.test + 1)</code></pre>
 </div>
@@ -455,15 +467,17 @@ pred_KNN_test&lt;-as.numeric(as.matrix(knn))</code></pre>
 <h2>Train with logistic regression</h2>
 <pre class="r"><code>y[y&gt;0.5]=1;y[y&lt;=0.5]=0;
 Meth&lt;-data.frame(cbind(y,t(x)))
-logit=glm(as.formula(paste(&quot;y~.&quot;)),Meth[train,],family = binomial)</code></pre>
-<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
-<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
-<pre class="r"><code># Note for some probes: the alg might not converge. In this case, we recommend to abondon logistic and work with the rest 4 methods if this happens.
+logit=glm(as.formula(paste(&quot;y~.&quot;)),Meth[train,],family = binomial)
+# Note for some probes: the alg might not converge. In this case, we recommend to abondon logistic and work with the rest 4 methods if this happens.
 # glm.fit: algorithm did not convergeglm.fit: fitted probabilities numerically 0 or 1 occurred
 pred_Logistic_test&lt;-predict(logit,Meth[test,],type = &quot;response&quot;)</code></pre>
-<!-- ## CUE prediction -->
-<!-- ```{r CUE} -->
-<!-- ``` -->
+</div>
+<div id="cue-prediction" class="section level2">
+<h2>CUE prediction</h2>
+<pre class="r"><code># equal weights
+K=4
+pred_CUE_equal_weighs &lt;- 1/K * (pred_Logistic_test + pred_KNN_test + pred_RF_test +pred_PFR_test)
+#pred_CUE &lt;- </code></pre>
 </div>
 
 

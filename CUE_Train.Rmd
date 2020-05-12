@@ -1,7 +1,7 @@
 ---
 title: "CUE_Train"
 author: "Gang Li"
-date: "4/30/2020"
+date: "5/12/2020"
 output: html_document
 ---
 
@@ -14,21 +14,22 @@ knitr::opts_chunk$set(echo = TRUE)
 This rmarkdown show how we train each imputation model. Three approaches for selecting weights for CUE can be found in our paper. These training processes can be used for users who would like to generate a new set of imputation reference models, for example by providing 450K and EPIC array data for a tissue other than placenta or whole blood (which are the only tissues currently available with our pretrained models). 
 ```{r generate_simulation_data}
 # generate HM450 as x and HM850 as y
-n = 100              # number of sampels
+n = 200              # number of sampels
 x <- matrix(rbeta(n*50,1,1),ncol=n) # upperstream 25 probes and downstream 25 probes measured by HM450
 y <- rbeta(n,1,1)    # the target HM850 probe
 
 Meth<-data.frame(cbind(y,t(x)))
-train=1:80
-test=81:100
+train=1:160
+test=161:200
 
 ```
 
 ## Train with PFR
 
-```{r PFR, eval=FALSE}
+```{r PFR}
 source("R/refund_lib.R")
 load("PTSD/Annotations.RData")
+#load("Data/Annotations.RData")
 p=dim(annotation.450K)[1]
 X_450 = matrix(rbeta(n*p,1,1),ncol=n) 
 rownames(X_450) <- rownames(annotation.450K)
@@ -129,8 +130,8 @@ pred_Logistic_test<-predict(logit,Meth[test,],type = "response")
 ```{r CUE}
 # equal weights
 K=4
-pred_CUE_equal——weighs <- 1/K * (pred_Logistic_test + )
-pred_CUE <- 
+pred_CUE_equal_weighs <- 1/K * (pred_Logistic_test + pred_KNN_test + pred_RF_test +pred_PFR_test)
+#pred_CUE <- 
 
 
 ```
