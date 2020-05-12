@@ -158,21 +158,26 @@ save(m.imputed,file="y_impute.RData")
 Note: we impute all 339K HM850 specific probes which had complete data in our reference whole blood and placenta datasets. Users of CUE must use the following quality control steps to retain the well imputed probes only for use in subsequent analysis (such as epigenome wide association studies).
 
 ## Quality Control
-Using the shiny app: CUE_QC.R to select the QC+ probe list.
-```{r CUE_QC}
-runApp('CUE_QC.R')
-```
-The shiny app will save a list of well imputed probes. Users can use the following code to save this list. 
+We provdies two sets of QC+ probes list for two datsets with the following thresholds:
 
+QC for ELGAN: RMSE<0.1 and Accruracy > 90%; 
+
+QC for PTSD: RMSE<0.05 and Accruracy > 95%.
 ```{r subset}
 QC_probes<-read.csv("Placenta (ELGAN)QC_probe_list.csv") # for Placenta
 #QC_probes<-read.csv("Whole Blood (PTSD)QC_probe_list") # for whole blood
 load("y_impute.RData")
 m.QC <- m.imputed[,paste(QC_probes)]
-
 save(m.QC, file="m.imputed.QC.RData")
 ```
 
+(Optional): We also provide an shiny app, CUE_QC.R, an visualization tool to select the QC+ probe list.
+```{r CUE_QC}
+runApp('CUE_QC.R')
+```
+The shiny app will save the list of well imputed probes. Users can use the previous code to subset the output probes. 
+
+The final QC+ imputed HM850 probes will be saved as "m.imputed.QC.RData". See the output:
 
 ```{r output from CUE}
 ## Output : DNA methylation matrix
