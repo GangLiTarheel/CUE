@@ -32,9 +32,15 @@
 ## load the CUE imputation function
 	source("R/impute.R")
 
+	
 ## Check the input
 	CUE_check(X)                        # check if the inuput X match the requirements
 
+## TCR required input	
+	temp <- TCR.input(X)
+	X_logit = temp[[1]]                 # Logit transformation make it better follows Gaussian distribution
+	test.funcs <- temp[[2]]             # Pre-calculated sample-specific density function
+	
 ## Imputation (Single CPU might takes 4-5 days to imputation for a middle sized methylation dataset (n=~100 samples).)
 	m.imputed<-CUE.impute(X,m,"PTSD")
 

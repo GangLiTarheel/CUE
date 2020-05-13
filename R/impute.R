@@ -1,11 +1,4 @@
-
-
-# line 64 need to change the directory
-
-#X<-sample_data
-#  the input dataset should have row as probes, columns as samples.
-#m<-dim(X)[2] # number of samples
-
+#  the input dataset X should have row as probes, columns as samples.
 
 # Check the input
 CUE_check <- function(X){
@@ -53,38 +46,9 @@ KNN.impute<-function(i){
     return(predict(bst,t(X[cov.probe,])))
 }
 
-TCR.impute<-function(i){
-    j <- paste(annotation.EPIC[CpG_list_PFR[i],"Relation_to_UCSC_CpG_Island"])
-    if (j == "") {
-        j <- "NA"
-    }
-    cov.probe<-neighbors_PFR[[i]]
-    cov.select <- X[cov.probe,]
-    X.test <- create_predictors(t(cov.select), t(test.funcs[[j]]))
-    Y.test <- X.test %*% TCR_model_best[[i]]#fit$coefs  
-    return(2 ^ Y.test / (2 ^ Y.test + 1))
-}
-
-# impute
-CUE.impute <- function(X=X,m=m,tissue="PTSD"){
-    ## RF
-    y_RF<-sapply(1:length(CpG_list_RF),RF.impute)
-    colnames(y_RF)<-CpG_list_RF
-    rownames(y_RF)<-colnames(X)
-
-    ## XGBoost
-    y_XGB<-sapply(1:length(CpG_list_XGBoost),XGB.impute)
-    rownames(y_XGB)=colnames(X)
-    colnames(y_XGB)<-CpG_list_XGBoost
-
-    ## KNN
-    y_KNN<-sapply(1:length(CpG_list_KNN),KNN.impute)
-    rownames(y_KNN)=colnames(X)
-    colnames(y_KNN)<-CpG_list_KNN
-    
-    ## TCR
+TCR.input<-function(X){
     X=log2(X/(1-X))
-
+    
     # Create the density 
     # Build the functional predictor for each group
     # setwd("PTSD/CUE/TCR/")
@@ -96,10 +60,52 @@ CUE.impute <- function(X=X,m=m,tissue="PTSD"){
         test.dens[[j]] <- X[ (annotation.450K[, "Relation_to_UCSC_CpG_Island"] == l),]
         test.funcs[[j]]<-apply(test.dens[[j]], 2, function(x){density(x,from=-13.38757,to=13.38757)$y})
     }
+    newlist <- list(X,test.funcs)
+    return(newlist)
+}
+
+TCR.impute<-function(i){
+    j <- paste(annotation.EPIC[CpG_list_PFR[i],"Relation_to_UCSC_CpG_Island"])
+    if (j == "") {
+        j <- "NA"
+    }
+    cov.probe<-neighbors_PFR[[i]]
+    cov.select <- X_logit[cov.probe,] #logit transformation
+    X.test <- create_predictors(t(cov.select), t(test.funcs[[j]]))
+    Y.test <- X.test %*% TCR_model_best[[i]]#fit$coefs  
+    return(2 ^ Y.test / (2 ^ Y.test + 1)) # inverse logit tranformation
+}
+
+# impute
+CUE.impute <- function(X=X,m=m,tissue="PTSD"){
+    ## RF
+    y_RF<-sapply(1:length(CpG_list_RF),RF.impute)
+    colnames(y_RF)<-CpG_list_RF
+    rownames(y_RF)<-colnames(X)
+    
+    cat("Imputation with random forests: Done!!!\n")
+
+    ## XGBoost
+    y_XGB<-sapply(1:length(CpG_list_XGBoost),XGB.impute)
+    rownames(y_XGB)=colnames(X)
+    colnames(y_XGB)<-CpG_list_XGBoost
+    
+    cat("Imputation with XGBoosting: Done!!!\n")
+
+    ## KNN
+    y_KNN<-sapply(1:length(CpG_list_KNN),KNN.impute)
+    rownames(y_KNN)=colnames(X)
+    colnames(y_KNN)<-CpG_list_KNN
+    
+    cat("Imputation with KNN: Done!!!\n")
 
     y_PFR<-sapply(1:length(CpG_list_PFR),TCR.impute)
     rownames(y_PFR)=colnames(X)
     colnames(y_PFR)<-CpG_list_PFR
+    
+    cat("Imputation with penalized functional regression: Done!!!\n")
+    
+    cat("Imputation with logistic regression: Omitted for PTSD!!!\n")
 
     m.impute<-cbind(y_PFR,y_RF,y_XGB,y_KNN)
     return(m.impute)
