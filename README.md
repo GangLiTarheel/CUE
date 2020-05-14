@@ -166,9 +166,11 @@ Note: (a) we impute all 339K HM850 specific probes which had complete data in ou
 
 File link:
 
-[HM850](ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v-1-0-b4-manifest-file-csv.zip)
+
 
 [HM450](https://github.com/Leonardo0628/pfr/blob/master/annotation/GPL13534-10305.csv.gz)
+
+[HM850](ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v-1-0-b4-manifest-file-csv.zip)
 
 ## Quality Control
 We provdies two sets of QC+ probes list for two datsets with the following thresholds:
