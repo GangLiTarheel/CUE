@@ -14,7 +14,7 @@ CUE is maintained by Gang Li [franklee@live.unc.edu] and Laura Raffield [laura_r
 ## Brief introduction
 From this study, we provide two sets of imputation models: one for whole blood and the other for placenta. 
 Investigators can therefore complete their own imputation of placental or whole blood HM850 CpG sites using their own HM450 data, without access to their own reference panel. 
-Our method is also applicable for imputation in other tissues, provided the user can provide a reference dataset assayed on both HM450 and HM850.
+Our method is also applicable to imputation in other tissues, provided the user can provide a reference dataset assayed on both HM450 and HM850.
 
 ## Installation 
 
@@ -165,12 +165,13 @@ Note: (a) we impute all 339K HM850 specific probes which had complete data in ou
 (b) we provided the corresponding annotation files within PTSD datasets ("PTSD/Annotations.RData") for building funtional predicitors for penalized function regression models. The annntation files can also be downloaded from the Illumina website.
 
 File link:
+[HM850](https://support.illumina.com/array/array_kits/infinium-methylationepic-beadchip-kit/downloads.html)
 
-
+ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v-1-0-b4-manifest-file-csv.zip
 
 [HM450](https://github.com/Leonardo0628/pfr/blob/master/annotation/GPL13534-10305.csv.gz)
 
-[HM850](ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v-1-0-b4-manifest-file-csv.zip)
+
 
 ## Quality Control
 We provdies two sets of QC+ probes list for two datsets with the following thresholds:
