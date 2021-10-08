@@ -209,5 +209,5 @@ head(m.QC[,1:5])
 ```
 
 ## Citation
-CUE
+Li G, Raffield L, Logue M, Miller MW, Santos HP Jr, O'Shea TM, Fry RC, Li Y. CUE: CpG impUtation ensemble for DNA methylation levels across the human methylation450 (HM450) and EPIC (HM850) BeadChip platforms. Epigenetics. 2021 Aug;16(8):851-861. doi: 10.1080/15592294.2020.1827716. Epub 2020 Oct 4. PMID: 33016200; PMCID: PMC8330997.
 
